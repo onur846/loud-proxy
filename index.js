@@ -9,24 +9,26 @@ app.use(cors());
 
 app.get('/top25', async (req, res) => {
   try {
-    const response = await axios.get(
+    const { data } = await axios.get(
       'https://foundation-api.stayloud.io/ipfs/list/?type=leaderboard&page=1&limit=25&sortBy=score&sortOrder=desc'
     );
 
-    const data = response.data?.data || [];
-
-    const users = data.map((item) => ({
-      username: item.username,
-      handle: item.handle,
-      avatar: item.profile_image_url,
-      score: item.score,
+    const users = (data?.data || []).map((user) => ({
+      username: user.username,
+      handle: user.handle,
+      avatar: user.profile_image_url,
+      score: user.score,
     }));
 
     res.json(users);
-  } catch (error) {
-    console.error('Error fetching leaderboard:', error.message);
+  } catch (err) {
+    console.error('Proxy fetch error:', err.message);
     res.status(500).json({ error: 'Could not fetch leaderboard data' });
   }
+});
+
+app.get('/', (req, res) => {
+  res.send('Loud Proxy is running');
 });
 
 app.listen(PORT, () => {
